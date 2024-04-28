@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resim Yükleme ve Metin Kutusu Örneği</title>
+<style>
+    body {
+        padding: 15%;
+        background-color: #D1E2E4;
+    }
+    .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .left-side {
+        width: 45%;
+    }
+
+    .right-side {
+        width: 45%;
+    }
+
+    #uploaded-image {
+        max-width: 100%;
+        max-height: 100%;
+    }
+    button {
+        padding: 10px;
+        font-size: 20px;
+    }
+    #dynamic-text {
+        font-size: 20px;
+        margin-top: 20px;
+        font-weight: bold;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-side">
+            <h2>Resim Yükleme</h2>
+            <input type="file" id="image-upload" accept="image/*"><br><br>
+            <img  id="uploaded-image"><br><br>
+        </div>
+        <div class="right-side">
+            <h2>Tahmin Sonucu</h2>
+            <button onclick="predict_image()">Tahmin Et</button>
+            <p id="dynamic-text"></p><br><br>
+
+        </div>
+    </div>
+
+<script>
+function predict_image() {
+    var secilenDosya = document.getElementById("image-upload").files[0];
+
+    if (!secilenDosya) {
+        alert("Lütfen bir resim seçin!");
+        return;
+    }
+
+    var formVerisi = new FormData();
+    formVerisi.append("file", secilenDosya);
+
+    fetch('/predict_image', {
+        method: 'POST',
+        body: formVerisi
+    })
+    .then(response => response.json())
+    .then(data => {
+    var sonuc = data.sonuc;
+
+    var sonucMetni = "Bu bir " + sonuc + " görselidir.";
+    document.getElementById("dynamic-text").textContent = sonucMetni;
+})
+    .catch(error => console.error('Error:', error));
+}
+
+
+    document.getElementById("image-upload").addEventListener("change", function(event) {
+        var loadedData = event.target.files[0];
+        var okuyucu = new FileReader();
+
+        okuyucu.onload = function(event) {
+            var imgElementi = document.getElementById("uploaded-image");
+            imgElementi.src = event.target.result;
+        };
+
+        okuyucu.readAsDataURL(loadedData);
+
+
+});
+</script>
+</body>
+</html>
